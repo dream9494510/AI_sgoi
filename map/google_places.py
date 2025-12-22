@@ -195,35 +195,58 @@ def parse_category(place):
 
 
 def generate_tags(place):
-    """生成標籤"""
+    """生成標籤 - 確保至少有1個標籤"""
     tags = []
     types = place.get('types', [])
     name = place['name'].lower()
     price_level = place.get('price_level', 2)
+    rating = place.get('rating', 0)
 
     # 價格標籤
     if price_level <= 1:
         tags.append('平價')
     elif price_level >= 3:
         tags.append('高檔')
+    else:
+        tags.append('中等價位')
 
     # 健康標籤
-    healthy_keywords = ['沙拉', '輕食', '健康', '蔬食', '素食']
+    healthy_keywords = ['沙拉', '輕食', '健康', '蔬食', '素食', '有機']
     if any(k in name for k in healthy_keywords):
         tags.append('健康餐')
+    
+    # 評價標籤
+    if rating >= 4.5:
+        tags.append('高評價 ⭐⭐⭐')
+    elif rating >= 4.0:
+        tags.append('好評')
 
-    # 其他標籤
-    if 'cafe' in types:
+    # 咖啡廳標籤
+    if 'cafe' in types or '咖啡' in name:
         tags.append('咖啡/讀書')
+    
+    # 火鍋標籤
+    if '火鍋' in name or 'hot pot' in name.lower():
+        tags.append('火鍋')
 
-    if place.get('rating', 0) >= 4.5:
-        tags.append('高評價')
+    # 聚餐標籤
+    if any(k in name for k in ['火鍋', '燒肉', '海鮮', '聚餐']):
+        tags.append('適合聚餐')
 
-    # 營業中
+    # 營業中標籤
     if place.get('opening_hours', {}).get('open_now', False):
         tags.append('營業中')
 
-    return tags[:3]  # 最多3個標籤
+    # 如果標籤為空，根據類別添加預設標籤
+    if not tags:
+        if 'cafe' in types:
+            tags.append('咖啡')
+        elif 'restaurant' in types:
+            tags.append('推薦')
+        else:
+            tags.append('新發現')
+
+    return tags[:4]  # 最多4個標籤
 
 
 # 測試

@@ -144,7 +144,7 @@ def get_restaurant(restaurant_id):
 
 @app.route('/api/search', methods=['GET'])
 def search_restaurants():
-    """搜尋餐廳 - 使用 Google Places API (優化版)"""
+    """搜尋餐廳 - 使用 Google Places API 搜尋完整餐廳資料"""
     try:
         query = request.args.get('q', '').strip()
 
@@ -153,6 +153,7 @@ def search_restaurants():
             return get_restaurants()
 
         # 直接用關鍵字搜尋 Google Places
+        print(f"\n[API] 搜尋關鍵字: {query}")
         result = search_nearby_restaurants(
             location=NKUST_LOCATION,
             radius=2000,
@@ -160,21 +161,28 @@ def search_restaurants():
         )
 
         if not result['success']:
+            print(f"[API ERROR] 搜尋失敗: {result['error']}")
             return jsonify(result), 500
 
-        # 排序結果 - 優先顯示距離近的
+        # 排序結果 - 優先顯示距離近的，其次是評分高的
         data = sorted(result['data'], 
-                     key=lambda r: r.get('distance_km', float('inf')))
+                     key=lambda r: (r.get('distance_km', float('inf')), -r.get('avg_rating', 0)))
 
+        print(f"[API] 搜尋成功，找到 {len(data)} 間餐廳")
+        
         return jsonify({
             'success': True,
             'data': data,
             'count': len(data),
             'source': 'google_places',
-            'query': query
+            'query': query,
+            'message': f"搜尋到 {len(data)} 間餐廳"
         })
 
     except Exception as e:
+        print(f"[API ERROR] 搜尋異常: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({
             'success': False,
             'error': str(e)
