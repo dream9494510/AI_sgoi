@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-Hant"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI 飲食助手</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+          font-variation-settings:
+            'FILL' 0,
+            'wght' 400,
+            'GRAD' 0,
+            'opsz' 24;
+          line-height: 1;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "brand-beige": "#E0D5AD",
+                "brand-green": "#92A78C",
+                "brand-dark": "#5B584F",
+                "brand-yellow": "#F7CD82",
+                "brand-orange": "#F79E6B",
+                "brand-background": "#FFFBF0",
+              },
+              fontFamily: {
+                "display": ["Noto Sans TC", "sans-serif"]
+              },
+              borderRadius: {
+                "DEFAULT": "0.5rem",
+                "lg": "0.75rem",
+                "xl": "1rem",
+                "2xl": "1.25rem",
+                "full": "9999px"
+              },
+              boxShadow: {
+                'soft': '0 4px 6px -1px rgba(91, 88, 79, 0.1), 0 2px 4px -2px rgba(91, 88, 79, 0.1)',
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        body {
+            background-color: #FFFBF0;
+            color: #5B584F;
+            font-family: "Noto Sans TC", sans-serif;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+
+    /* 波浪動畫 */
+    .typing-dot {
+      display: inline-block;
+      animation: wave 1.4s ease-in-out infinite;
+    }
+
+    .typing-dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .typing-dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes wave {
+      0%, 60%, 100% {
+        transform: translateY(0);
+      }
+      30% {
+        transform: translateY(-8px);
+      }
+    }
+  </style>
+  </head>
+<body class="flex min-h-screen flex-col">
+<div class="relative flex h-full min-h-screen w-full flex-col group/design-root">
+<header class="sticky top-0 z-10 flex items-center justify-between border-b border-brand-dark/10 bg-brand-background/80 p-4 backdrop-blur-sm">
+<div class="flex size-10 items-center justify-start">
+<span class="material-symbols-outlined text-2xl text-brand-dark">arrow_back_ios_new</span>
+</div>
+<h1 class="text-lg font-bold text-brand-dark">AI飲食助手</h1>
+<div class="flex size-10 items-center justify-end">
+</div>
+</header>
+<main class="flex flex-1 flex-col gap-4 p-4 pb-24">
+<div class="flex justify-start">
+<div class="max-w-[80%] rounded-2xl rounded-bl-lg bg-white p-3 shadow-soft">
+<p class="text-sm leading-relaxed text-brand-dark">您好！我是您的 AI 飲食助手，有什麼可以為您服務的嗎？例如，您可以問我：「早餐想吃點健康的，有什麼建議？」</p>
+</div>
+</div>
+<div class="flex justify-end">
+<div class="max-w-[80%] rounded-2xl rounded-br-lg bg-[#E3EADF] p-3 shadow-soft">
+<p class="text-sm leading-relaxed text-brand-dark">我今天運動量比較大，晚餐應該怎麼吃才能幫助肌肉恢復？</p>
+</div>
+</div>
+<div class="flex justify-start">
+<div class="max-w-[80%] rounded-2xl rounded-bl-lg bg-white p-3 shadow-soft">
+<p class="text-sm leading-relaxed text-brand-dark">很棒的問題！運動後補充優質蛋白質和適量碳水化合物是關鍵。建議您可以選擇：<br/>1. 烤雞胸肉搭配地瓜和花椰菜。<br/>2. 鮭魚炒飯，搭配毛豆。<br/>3. 便利商店的話，可以選無糖豆漿、茶葉蛋和一根香蕉。<br/><br/>這些組合都能有效補充能量，幫助肌肉修復！</p>
+</div>
+</div>
+</main>
+<footer class="fixed bottom-0 left-0 right-0 z-10 bg-brand-background p-4">
+<div class="flex w-full items-center gap-2">
+<input id="messageInput" class="flex-1 rounded-full border-0 bg-white px-4 py-3 text-sm text-brand-dark placeholder-brand-dark/50 shadow-soft focus:ring-2 focus:ring-brand-green/50" placeholder="輸入訊息..." type="text"/>
+<button id="sendButton" class="flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-brand-green text-white shadow-lg">
+<span class="material-symbols-outlined">send</span>
+</button>
+</div>
+</footer>
+</div>
+
+<script>
+// API 配置
+const API_URL = 'http://localhost:5000/api/chat';
+const CLEAR_URL = 'http://localhost:5000/api/clear';
+const SESSION_ID = 'user_' + Date.now(); // 每次開啟頁面生成新的 session
+
+// DOM 元素
+const messageInput = document.getElementById('messageInput');
+const sendButton = document.getElementById('sendButton');
+const chatContainer = document.querySelector('main');
+
+// 初始化：清除範例訊息
+chatContainer.innerHTML = `
+<div class="flex justify-start">
+  <div class="max-w-[80%] rounded-2xl rounded-bl-lg bg-white p-3 shadow-soft">
+    <p class="text-sm leading-relaxed text-brand-dark">您好！我是您的 AI 飲食助手，有什麼可以為您服務的嗎？<br/>例如：「午餐推薦什麼菜？」</p>
+  </div>
+</div>
+`;
+
+// 添加訊息到聊天視窗
+function addMessage(text, isUser = false) {
+  const messageDiv = document.createElement('div');
+  messageDiv.className = `flex justify-${isUser ? 'end' : 'start'}`;
+
+  const bubbleDiv = document.createElement('div');
+  bubbleDiv.className = `max-w-[80%] rounded-2xl rounded-b${isUser ? 'r' : 'l'}-lg ${isUser ? 'bg-[#E3EADF]' : 'bg-white'} p-3 shadow-soft`;
+
+  const textP = document.createElement('p');
+  textP.className = 'text-sm leading-relaxed text-brand-dark';
+  textP.innerHTML = text.replace(/\n/g, '<br/>');
+
+  bubbleDiv.appendChild(textP);
+  messageDiv.appendChild(bubbleDiv);
+  chatContainer.appendChild(messageDiv);
+
+  // 滾動到底部
+  chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+
+// 顯示「...」載入氣泡
+let loadingBubble = null;
+
+function showLoadingBubble() {
+  const messageDiv = document.createElement('div');
+  messageDiv.className = 'flex justify-start';
+  messageDiv.id = 'loading-bubble';
+
+  const bubbleDiv = document.createElement('div');
+  bubbleDiv.className = 'max-w-[80%] rounded-2xl rounded-bl-lg bg-white p-3 shadow-soft';
+
+  const textP = document.createElement('p');
+  textP.className = 'text-sm leading-relaxed text-brand-dark';
+  textP.innerHTML = '輸入中<span class="typing-dot">.</span><span class="typing-dot">.</span><span class="typing-dot">.</span>';
+
+  bubbleDiv.appendChild(textP);
+  messageDiv.appendChild(bubbleDiv);
+  chatContainer.appendChild(messageDiv);
+
+  loadingBubble = messageDiv;
+  chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+
+function removeLoadingBubble() {
+  if (loadingBubble) {
+    loadingBubble.remove();
+    loadingBubble = null;
+  }
+}
+
+// 發送訊息
+async function sendMessage() {
+  const message = messageInput.value.trim();
+
+  if (!message) return;
+
+  // 顯示使用者訊息
+  addMessage(message, true);
+  messageInput.value = '';
+
+  // 顯示載入氣泡
+  showLoadingBubble();
+
+  // 顯示載入中
+  sendButton.disabled = true;
+  sendButton.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span>';
+
+  try {
+    // 呼叫 API
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message: message,
+        session_id: SESSION_ID
+      })
+    });
+
+    const data = await response.json();
+
+    // 移除載入氣泡
+    removeLoadingBubble();
+
+    if (data.success) {
+      // 顯示 AI 回覆
+      addMessage(data.response, false);
+    } else {
+      addMessage('❌ 錯誤: ' + (data.error || '無法取得回覆'), false);
+    }
+
+  } catch (error) {
+    console.error('API Error:', error);
+    removeLoadingBubble();
+    addMessage('❌ 連線錯誤: 請確認後端伺服器是否運行 (python chat_api.py)', false);
+  } finally {
+    // 恢復按鈕
+    sendButton.disabled = false;
+    sendButton.innerHTML = '<span class="material-symbols-outlined">send</span>';
+  }
+}
+
+// 事件監聽
+sendButton.addEventListener('click', sendMessage);
+
+messageInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    sendMessage();
+  }
+});
+
+// 測試連線
+fetch('http://localhost:5000/api/health')
+  .then(res => res.json())
+  .then(data => {
+    console.log('✓ API 連線成功:', data);
+  })
+  .catch(err => {
+    console.error('✗ API 連線失敗:', err);
+    addMessage('⚠️ 提示: 請先啟動後端伺服器\n執行指令: python AI/chat_api.py', false);
+  });
+</script>
+
+</body></html>

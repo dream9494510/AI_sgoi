@@ -1,0 +1,70 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# 虛擬環境
+venv/
+ENV/
+env/
+.venv
+
+# 環境變數檔案 (包含 API Keys)
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# 測試
+.pytest_cache/
+.coverage
+htmlcov/
+
+# 資料庫
+*.db
+*.sqlite
+*.sqlite3
+
+# 日誌
+*.log
+
+# 暫存檔案
+*.tmp
+*.temp
+*.cache
+
+# OS
+Thumbs.db
+Desktop.ini
+
+# 專案特定
+*.bak
+*.backup
+test_output/
