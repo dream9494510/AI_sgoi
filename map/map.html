@@ -144,12 +144,12 @@
           </button>
         </div>
         
-        <div>
+        <div style="pointer-events: auto;">
           <div class="flex w-full items-stretch rounded-full h-12 bg-white/80 shadow-lg backdrop-blur-sm overflow-hidden">
             <div class="flex items-center justify-center pl-4 text-gray-600">
               <span class="material-symbols-outlined text-2xl">search</span>
             </div>
-            <input id="searchInput" class="flex w-full min-w-0 flex-1 bg-transparent text-gray-700 focus:outline-none placeholder:text-gray-400 px-3 text-base" placeholder="搜尋餐廳、料理..." value=""/>
+            <input id="searchInput" type="text" class="flex w-full min-w-0 flex-1 bg-transparent text-gray-700 focus:outline-none placeholder:text-gray-400 px-3 text-base border-none" placeholder="搜尋餐廳、料理..." value="" style="pointer-events: auto; -webkit-appearance: none; appearance: none;"/>
           </div>
         </div>
         
@@ -416,18 +416,24 @@
     });
 
     document.querySelectorAll('.category-btn').forEach((button, index) => {
-      button.addEventListener('click', () => {
+      button.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
         document.querySelectorAll('.category-btn').forEach(btn => {
           btn.className = 'flex h-10 shrink-0 items-center justify-center gap-x-1.5 rounded-full bg-white/80 text-brand-dark pl-4 pr-5 backdrop-blur-sm shadow-soft hover:shadow-lg transition category-btn';
-          btn.querySelector('.material-symbols-outlined').classList.remove('filled');
+          const icon = btn.querySelector('.material-symbols-outlined');
+          if (icon) icon.classList.remove('filled');
         });
 
         button.className = 'flex h-10 shrink-0 items-center justify-center gap-x-1.5 rounded-full bg-brand-green text-white pl-4 pr-5 shadow-soft hover:shadow-lg transition category-btn';
-        button.querySelector('.material-symbols-outlined').classList.add('filled');
+        const activeIcon = button.querySelector('.material-symbols-outlined');
+        if (activeIcon) activeIcon.classList.add('filled');
 
         const categories = ['全部', '健康餐', '平價', '適合聚餐', '咖啡廳'];
         selectedCategory = categories[index];
         document.getElementById('searchInput').value = '';
+        console.log('選擇分類:', selectedCategory);
         loadRestaurants(selectedCategory);
       });
     });

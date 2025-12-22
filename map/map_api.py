@@ -47,10 +47,10 @@ def get_restaurants():
             restaurants = cached_restaurants
             print(f"[API] 使用快取資料，共 {len(restaurants)} 間")
         else:
-            # 先從 Google Places 搜尋全部餐廳
+            # 先從 Google Places 搜尋全部餐廳 - 擴大半徑到3000米
             result = search_nearby_restaurants(
                 location=NKUST_LOCATION,
-                radius=2000,
+                radius=3000,
                 type_filter=None  # 先不用 type_filter，直接搜尋所有餐廳
             )
 
@@ -72,10 +72,10 @@ def get_restaurants():
             filtered_restaurants = []
             
             category_keywords = {
-                '健康餐': ['健康', '輕食', '沙拉', '蔬菜', '素食', '健身'],
-                '平價': ['平價', '便當', '小吃', '蚵仔煎', '大腸麵線', '滷肉飯'],
-                '適合聚餐': ['火鍋', '燒肉', '海鮮', '餐廳', '聚餐', '聚'],
-                '咖啡廳': ['咖啡', 'cafe', '咖啡館', '手沖', '拿鐵', '卡布奇諾']
+                '健康餐': ['健康', '輕食', '沙拉', '蔬菜', '素食', '健身', '無糖', '低卡', '雞肉', '健身餐', '超商', 'smoothie', 'bowl'],
+                '平價': ['平價', '便當', '小吃', '蚵仔煎', '大腸麵線', '滷肉飯', '麵', '飯', '湯', '拉麵', '牛肉麵', '傳統'],
+                '適合聚餐': ['火鍋', '燒肉', '海鮮', '餐廳', '聚餐', '聚', '日式', '義式', '烤', '吃到飽', '和食', '中式', 'bbq'],
+                '咖啡廳': ['咖啡', 'cafe', '咖啡館', '手沖', '拿鐵', '卡布奇諾', 'coffee', '咖啡館', '甜點', '烘焙', '冷萃']
             }
             
             keywords = category_keywords.get(category, [])
@@ -92,11 +92,15 @@ def get_restaurants():
                 if match:
                     filtered_restaurants.append(restaurant)
             
+            # 如果篩選結果太少（少於3家），降低篩選要求，只按分類篩選
+            if len(filtered_restaurants) < 3 and category == '咖啡廳':
+                filtered_restaurants = [r for r in restaurants if r.get('category', '') == '咖啡廳']
+            
             restaurants = filtered_restaurants
             print(f"[API] 篩選 '{category}': {len(restaurants)}/{original_count} 間")
 
-        # 按距離排序
-        restaurants = sorted(restaurants, key=lambda r: r.get('distance_km', float('inf')))
+        # 按距離和評分排序
+        restaurants = sorted(restaurants, key=lambda r: (r.get('distance_km', float('inf')), -r.get('avg_rating', 0)))
 
         return jsonify({
             'success': True,
@@ -156,7 +160,7 @@ def search_restaurants():
         print(f"\n[API] 搜尋關鍵字: {query}")
         result = search_nearby_restaurants(
             location=NKUST_LOCATION,
-            radius=2000,
+            radius=3000,
             keyword=query
         )
 

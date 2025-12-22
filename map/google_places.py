@@ -55,7 +55,7 @@ def search_nearby_restaurants(location=None, radius=1500, keyword=None, type_fil
 
         if data['status'] == 'OK':
             restaurants = []
-            for place in data['results'][:10]:  # 限制10家
+            for place in data['results'][:20]:  # 增加到20家
                 restaurant = parse_place_to_restaurant(place, location)
                 restaurants.append(restaurant)
 
