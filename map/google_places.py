@@ -90,8 +90,8 @@ def parse_place_to_restaurant(place, center_location):
     # 價格等級
     price_level = place.get('price_level', 2)
 
-    # 評分轉換 (Google 是 0-5，我們要 0-10)
-    avg_rating = round(place.get('rating', 4.0) * 2, 1)
+    # 評分 (Google 是 0-5，直接使用)
+    avg_rating = round(place.get('rating', 4.0), 1)
 
     # 營養評分 (根據類別估算)
     nutrition_score = estimate_nutrition_score(place)

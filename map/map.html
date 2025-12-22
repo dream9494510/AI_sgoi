@@ -314,14 +314,14 @@
     function showRestaurantInfo(restaurant, marker) {
       if (currentInfoWindow) currentInfoWindow.close();
       const rating = parseFloat(restaurant.avg_rating) || 0;
-      const ratingStars = '⭐'.repeat(Math.floor(rating / 2));
+      const ratingStars = '⭐'.repeat(Math.floor(rating));  // 0-5 評分
       const priceSymbol = '$'.repeat(Math.max(1, restaurant.price_level || 2));
       const tags = (restaurant.tags && Array.isArray(restaurant.tags)) ? restaurant.tags.slice(0, 2) : [];
       const tagsStr = tags.length > 0 ? tags.join(' • ') : '無標籤';
       
       const infoContent = '<div style="padding: 14px; font-family: Noto Sans TC, sans-serif; max-width: 300px;background:#fff;border-radius:8px;">' +
         '<h3 style="font-weight: bold; margin: 0 0 8px 0; font-size: 16px; color:#333;">' + restaurant.name + '</h3>' +
-        '<div style="font-size: 14px; color: #F7CD82; margin-bottom: 6px;">' + (ratingStars || '未評分') + ' <span style="color:#666;">' + rating.toFixed(1) + '/10</span></div>' +
+        '<div style="font-size: 14px; color: #F7CD82; margin-bottom: 6px;">' + (ratingStars || '未評分') + ' <span style="color:#666;">' + rating.toFixed(1) + '/5</span></div>' +
         '<div style="font-size: 13px; color: #666; margin-bottom: 6px;line-height:1.5;">' +
           '<div>類別: <span style="color:#92A78C;font-weight:600;">' + restaurant.category + '</span></div>' +
           '<div>價格: <span style="font-weight:600;">' + priceSymbol + '</span></div>' +
@@ -342,7 +342,7 @@
       restaurantList.forEach(restaurant => {
         const priceSymbol = '$'.repeat(Math.max(1, restaurant.price_level || 2));
         const rating = parseFloat(restaurant.avg_rating) || 0;
-        const ratingStars = '⭐'.repeat(Math.floor(rating / 2));
+        const ratingStars = '⭐'.repeat(Math.floor(rating));  // 0-5 評分
         const category = restaurant.category || '餐廳';
         const distance = parseFloat(restaurant.distance_km) || 0;
         const tags = restaurant.tags && Array.isArray(restaurant.tags) ? restaurant.tags : [];
@@ -388,7 +388,10 @@
       }
     }
 
-    document.getElementById('searchInput').addEventListener('input', async (e) => {
+    document.getElementById('searchInput').addEventListener('keydown', async (e) => {
+      // 只在按 Enter 時搜尋
+      if (e.key !== 'Enter') return;
+      
       const query = e.target.value.trim();
       if (!query) {
         loadRestaurants(selectedCategory);
